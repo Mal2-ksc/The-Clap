@@ -1,0 +1,330 @@
+// The Clap 1.22.07 by Malaclypse the Younger, mal2fnord@gmail.com
+// 
+// Get The Clap. Give The Clap to your friends. Give The Clap to your family. Give The Clap to your associates. Give The Clap to your enemies. Give The Clap to strangers in another country. Give everyone The Clap, it's as free as love!
+// 👏👏👏👏
+//
+// There is no separate documentation, so read the comments :) .
+// All samples are finely hand crafted. Literally. I made every sound here using only my hands. If you want them at their original sampled speed, set the relevant Tune controls to 50%. I tried to leave them there by default as much as possible.
+// Note assignments are detailed below and align as well as I could with the GM standard, except for:
+// • A snare "swirl" replaces "Hand Clap". This will loop as long as the key is held down.
+// • Clave and both Woodblocks have been moved down two octaves on the keyboard, where Ride Cymbal, Chinese Cymbal, and Ride Cymbal Bell normally go. This is to make the drum map more tidy, but they also kind of work as cymbal sounds which are otherwise lacking in this kit.
+// • The open hi-hat is muted by either the closed or foot hi-hat. If you want to make one or both of those NOT mute the open hi-hat, remove "group=5" from any note you want to stop acting as a muting trigger. And with that implemented passably, it finally gets a Version 1 tag.
+//
+// The MIT license applies only to distribution of the Software itself, and
+// individual components that comprise it. There is ABSOLUTELY NO REQUIREMENT
+// to provide credit when merely using the instrument to make sound. You are
+// only required to provide the boilerplate license if distributing the
+// instrument itself or pieces of.
+//
+// --------------------------Begin boilerplate license--------------------------
+// MIT License 
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy 
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions: 
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software. Additionally, all 
+// alterations which are distributed are to be attributed to the person or
+// organization making them.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// ---------------------------End boilerplate license---------------------------
+
+// ░░░░░░ F0 (29) Scratch Push
+//   ▓▓▓▓ F#0(30) Scratch Pull
+// ░░░░░░ G0 (31) Squeeze (normally unassigned)
+//   ▓▓▓▓ G#0(32) Suck (normally unassigned)
+// ░░░░░░ A0 (33) Tink (normally unassigned)
+//   ▓▓▓▓ A#0(34) Crack (normally unassigned)
+// ░░░░░░ B0 (35) Acoustic Bass Drum
+// ░░░░░░ C1 (36) Kick Drum
+//   ▓▓▓▓ C#1(37) Side Stick
+// ░░░░░░ D1 (38) Acoustic Snare
+//   ▓▓▓▓ D#1(39) Snare Swirl [normally Hand Claps]
+// ░░░░░░ E1 (40) Electric Snare
+// ░░░░░░ F1 (41) Low Floor Tom
+//   ▓▓▓▓ F#1(42) Hi-Hat Closed
+// ░░░░░░ G1 (43) High Floor Tom
+//   ▓▓▓▓ G#1(44) Hi-Hat Pedal
+// ░░░░░░ A1 (45) Low Tom
+//   ▓▓▓▓ A#1(46) Hi-Hat Open
+// ░░░░░░ B1 (47) Lo-Mid Tom
+// ░░░░░░ C2 (48) Hi-Mid Tom
+//   ▓▓▓▓ C#2(49) Crash Cymbal 1
+// ░░░░░░ D2 (50) High Tom
+//   ▓▓▓▓ D#2(51) Clave [normally Ride Cymbal]
+// ░░░░░░ E2 (52) High Woodblock [normally Chinese Cymbal]
+// ░░░░░░ F2 (53) Low Woodblock [normally Ride Bell]
+//   ▓▓▓▓ F#2(54) Guiro Short [normally Tambourine]
+// ░░░░░░ G2 (55) Guiro Long [normally Splash Cymbal]
+//   ▓▓▓▓ G#2(56) Cowbell
+// ░░░░░░ A2 (57) Crash Cymbal 2
+
+// Curve 0 is linear, from 0 to 1. v000=0 v127=1
+// Curve 1 is bipolar, from -1 to 1.  v000=-1 v127=1
+// Curve 2 is inverted linear, from 1 to 0. v000=1 v127=0
+// Curve 3 bipolar inverted, from 1 to -1. v000=1 v127=-1
+// Curve 4 concave (square the Curve 0 value).
+// Curve 5 is Xfin power curve (square root of Curve 0 value).
+// Curve 6 is Xfout power curve (square root of Curve 2 value).
+
+<control>
+#define $TUNINGRANGE 1200 // Max deflection of the Tune controls (in cents)
+#define $DYN_RANGE 98 // Keeps dynamic range to about 36 dB (ff attack vs. pp attack)
+
+// CC7 and CC10 are forced on us by Sforzando. Might as well make them look good and pad out the rest of the row. CC7 is still master volume. CC10 has been recycled.
+set_cc7=84 label_cc7=7:👏 Volume 👏
+set_cc8=63 label_cc8=8:Bass ±dB
+set_cc9=63 label_cc9=9:Mid ±dB
+set_cc10=63 label_cc10=10:Treble ±dB
+set_cc12=127 label_cc12=12:Lowpass Frq
+// The Release control only affects loops and normal "while holding the key" sounds. Currently the Snare Swirl is the only such example.
+set_cc13=13 label_cc13=13:Release
+
+// Tune any "instrument". The CC is the same as the note number, except when part of a group. In that case, the CC is the note number of the lowest member of the group.
+set_cc29=63 label_cc29=29:Scratch ↑ Џ
+set_cc30=63 label_cc30=30:Scratch ↓ Џ
+set_cc35=25 label_cc35=35:Bass Drum Џ
+set_cc36=63 label_cc36=36:Kick Drum Џ
+set_cc37=63 label_cc37=37:Side Stick Џ
+set_cc38=70 label_cc38=38:Ac Snare Џ
+set_cc39=51 label_cc39=39:Snare Brush Џ
+set_cc40=63 label_cc40=40:Elec Snare Џ
+set_cc41=51 label_cc41=41:Lo Flr Tom Џ
+set_cc42=63 label_cc42=42:Hi-Hat Џ
+set_cc43=63 label_cc43=43:Hi Flr Tom Џ
+set_cc45=63 label_cc45=45:Low Tom Џ
+set_cc47=76 label_cc47=47:Lo-Mid Tom Џ
+set_cc48=76 label_cc48=48:Hi-Mid Tom Џ
+set_cc49=63 label_cc49=49:Crash 1 Џ
+set_cc50=63 label_cc50=50:High Tom Џ
+set_cc51=63 label_cc51=51:Claves Џ
+set_cc52=63 label_cc52=52:Hi Woodblk Џ
+set_cc53=51 label_cc53=53:Lo Woodblk Џ
+set_cc54=63 label_cc54=54:Guiro Џ
+set_cc57=63 label_cc57=57:Crash 2 Џ
+
+// Pan any "instrument". The CC is the same as 30+the note number, except when part of a group. In that case, the CC is 30+the note number of the lowest member of the group.
+set_cc59=63 label_cc59=59:Scratch ↑ ↔
+set_cc60=63 label_cc60=60:Scratch ↓ ↔
+set_cc65=63 label_cc65=65:Bass Drum ↔
+set_cc66=63 label_cc66=66:Kick Drum ↔
+set_cc67=65 label_cc67=67:Side Stick ↔
+set_cc68=65 label_cc68=68:Ac Snare ↔
+set_cc69=65 label_cc69=69:Snare Brush ↔
+set_cc70=65 label_cc70=70:Elec Snare ↔
+set_cc71=76 label_cc71=71:Lo Flr Tom ↔
+set_cc72=70 label_cc72=72:Hi-Hat ↔
+set_cc73=51 label_cc73=73:Hi Flr Tom ↔
+set_cc75=56 label_cc75=75:Low Tom ↔
+set_cc77=61 label_cc77=77:Lo-Mid Tom ↔
+set_cc78=67 label_cc78=78:Hi-Mid Tom ↔
+set_cc79=78 label_cc79=79:Crash 1 ↔
+set_cc80=70 label_cc80=80:High Tom ↔
+set_cc81=63 label_cc81=81:Claves ↔
+set_cc82=53 label_cc82=82:Hi Woodblk ↔
+set_cc83=72 label_cc83=83:Lo Woodblk ↔
+set_cc84=63 label_cc84=84:Guiro ↔
+set_cc87=48 label_cc87=87:Crash 2 ↔
+
+default_path=samples/ // I use a flat file structure. How convenient.
+
+//Tone Stack section
+#define $EQ1 200 // $EQ1LO = frequency for the center of EQ1
+#define $EQ2 800 // $EQ2LO = frequency for the center of EQ2
+#define $EQ3 3200 // $EQ3LO = frequency for the center of EQ3
+#define $EQBOOST 24 // How far (total dB both ways) can the EQ bands cut or boost?
+#define $EQBW 2 // Bandwidth of EQ bands (in octaves)
+
+<global>
+volume=0 loop_mode=one_shot amp_veltrack=98 pan_oncc10=0
+//Tone Stack section -- can also provide distortion effects when boosted enough.
+eq1_freq=$EQ1 eq1_bw=$EQBW eq1_gain=-0.5*$EQBOOST eq1_gaincc8=$EQBOOST // Bass
+eq2_freq=$EQ2 eq2_bw=$EQBW eq2_gain=-0.5*$EQBOOST eq2_gaincc9=$EQBOOST // Mid
+eq3_freq=$EQ3 eq3_bw=$EQBW eq3_gain=-0.5*$EQBOOST eq3_gaincc10=$EQBOOST // Treble
+//LPF "Tone Knob" separate from Tone Stack
+fil_type=lpf_1p cutoff=20 cutoff_cc12=48000 cutoff_curvecc12=4 // Lowpass
+ampeg_release_curvecc13=4 ampeg_releasecc13=1 // Release setting
+group=1
+
+<master>
+// Scratch Push
+  <group> key=29 pitch_oncc29=$TUNINGRANGE pitch_curvecc29=1 seq_length=4 pan_oncc59=100 pan_curvecc59=1 volume=-6
+    <region> seq_position=1 sample=29-scratch push_rr1.flac
+    <region> seq_position=2 sample=29-scratch push_rr2.flac
+    <region> seq_position=3 sample=29-scratch push_rr3.flac
+    <region> seq_position=4 sample=29-scratch push_rr4.flac
+// Scratch Pull
+  <group> key=30 pitch_oncc30=$TUNINGRANGE pitch_curvecc30=1 seq_length=4 pan_oncc60=100 pan_curvecc60=1 volume=-6
+    <region> seq_position=1 sample=30-scratch_pull_rr1.flac
+    <region> seq_position=2 sample=30-scratch_pull_rr2.flac
+    <region> seq_position=3 sample=30-scratch_pull_rr3.flac
+    <region> seq_position=4 sample=30-scratch_pull_rr4.flac
+// Squeeze (uses Scratch Push pitch and pan)
+  <group> key=31 pitch_oncc29=$TUNINGRANGE pitch_curvecc29=1 pan_oncc59=100 pan_curvecc59=1 volume=-6
+    <region> lovel=0 hivel=63 sample=31-squeeze_v1.flac
+    // gradually gets more "mid-level" from velocity 64 to 69. Could implement as curves later but this works for now.
+    <region> lovel=64 hivel=65 sample=31-squeeze_v1.flac volume=-3
+	<region> lovel=64 hivel=65 sample=31-squeeze_v2.flac volume=-9
+    <region> lovel=66 hivel=67 sample=31-squeeze_v1.flac volume=-6
+	<region> lovel=66 hivel=67 sample=31-squeeze_v2.flac volume=-6
+    <region> lovel=68 hivel=69 sample=31-squeeze_v1.flac volume=-9
+	<region> lovel=68 hivel=69 sample=31-squeeze_v2.flac volume=-3
+	<region> lovel=70 hivel=73 sample=31-squeeze_v2.flac
+    // gradually gets more "high-level" from velocity 74 to 79. Could implement as curves later but this works for now.
+    <region> lovel=74 hivel=75 sample=31-squeeze_v2.flac volume=-3
+	<region> lovel=74 hivel=75 sample=31-squeeze_v3.flac volume=-9
+    <region> lovel=76 hivel=77 sample=31-squeeze_v2.flac volume=-6
+	<region> lovel=76 hivel=77 sample=31-squeeze_v3.flac volume=-6
+    <region> lovel=78 hivel=79 sample=31-squeeze_v2.flac volume=-9
+	<region> lovel=78 hivel=79 sample=31-squeeze_v3.flac volume=-3
+	// all "high-level" from 80 on up.
+    <region> lovel=80 hivel=127 sample=31-squeeze_v3.flac
+// Suck (uses Scratch Pull pitch and pan)
+  <group> key=32 pitch_oncc30=$TUNINGRANGE pitch_curvecc30=1 pan_oncc60=100 pan_curvecc60=1 volume=-6
+    <region> lovel=0 hivel=63 sample=32-suck_v1.flac
+    // gradually gets more "mid-level" from velocity 64 to 69. Could implement as curves later but this works for now.
+    <region> lovel=64 hivel=65 sample=32-suck_v1.flac volume=-3
+	<region> lovel=64 hivel=65 sample=32-suck_v2.flac volume=-9
+    <region> lovel=66 hivel=67 sample=32-suck_v1.flac volume=-6
+	<region> lovel=66 hivel=67 sample=32-suck_v2.flac volume=-6
+    <region> lovel=68 hivel=69 sample=32-suck_v1.flac volume=-9
+	<region> lovel=68 hivel=69 sample=32-suck_v2.flac volume=-3
+	<region> lovel=70 hivel=73 sample=32-suck_v2.flac
+    // gradually gets more "high-level" from velocity 74 to 79. Could implement as curves later but this works for now.
+    <region> lovel=74 hivel=75 sample=32-suck_v2.flac volume=-3
+	<region> lovel=74 hivel=75 sample=32-suck_v3.flac volume=-9
+    <region> lovel=76 hivel=77 sample=32-suck_v2.flac volume=-6
+	<region> lovel=76 hivel=77 sample=32-suck_v3.flac volume=-6
+    <region> lovel=78 hivel=79 sample=32-suck_v2.flac volume=-9
+	<region> lovel=78 hivel=79 sample=32-suck_v3.flac volume=-3
+	// all "high-level" from 80 on up.
+    <region> lovel=80 hivel=127 sample=32-suck_v3.flac
+// Tinks (knuckle snaps with some distinct pitch) -- uses Hi Woodblock tuning & pan
+  <group> key=33 pitch_oncc52=$TUNINGRANGE pitch_curvecc52=1 pan_oncc82=100 pan_curvecc82=1 seq_length=3
+    <region> seq_position=1 sample=33-tink_rr1.flac
+    <region> seq_position=2 sample=33-tink_rr2.flac
+    <region> seq_position=3 sample=33-tink_rr3.flac
+// Cracks (knuckle snaps without distinct pitch) -- uses Claves tuning & pan
+  <group> key=34 pitch_oncc51=$TUNINGRANGE pitch_curvecc51=1 pan_oncc81=100 pan_curvecc81=1 seq_length=2
+    <region> seq_position=1 sample=34-crack_rr1.flac
+    <region> seq_position=2 sample=34-crack_rr2.flac
+// Acoustic Bass Drum
+  <group> key=35 pitch_oncc35=$TUNINGRANGE pitch_curvecc35=1 pan_oncc65=100 pan_curvecc65=1
+    <region> amplitude_cc131=100 amplitude_curvecc131=6 seq_position=2 sample=35-kick_v1_rr2.flac
+    <region> amplitude_cc131=100 amplitude_curvecc131=5 seq_position=2 sample=35-kick_v2_rr2.flac
+// Kick Drum
+  <group> key=36 pitch_oncc36=$TUNINGRANGE pitch_curvecc36=1 pan_oncc66=100 pan_curvecc66=1
+    <region> amplitude_cc131=100 amplitude_curvecc131=6 seq_position=1 sample=36-kick_v1_rr1.flac
+    <region> amplitude_cc131=100 amplitude_curvecc131=5 seq_position=1 sample=36-kick_v2_rr1.flac
+// Side Stick
+  <group> key=37 pitch_oncc37=$TUNINGRANGE pitch_curvecc37=1 pan_oncc67=100 pan_curvecc67=1
+    <region> amplitude_cc131=100 amplitude_curvecc131=6 sample=37-Side_stick_snap_vl1.flac
+    <region> amplitude_cc131=100 amplitude_curvecc131=5 sample=37-Side_stick_snap_vl2.flac
+// Acoustic Snare (the dry sounding one)
+  <group> key=38 pitch_oncc38=$TUNINGRANGE pitch_curvecc38=1 seq_length=4 pan_oncc68=100 pan_curvecc68=1
+    <region> seq_position=1 sample=38-snare-acoustic_rr1.flac
+    <region> seq_position=2 sample=38-snare-acoustic_rr2.flac
+    <region> seq_position=3 sample=38-snare-acoustic_rr3.flac
+    <region> seq_position=4 sample=38-snare-acoustic_rr4.flac
+// Snare Swirl (stops when released)
+  <group> key=39 pitch_oncc39=$TUNINGRANGE pitch_curvecc39=1 pan_oncc69=100 pan_curvecc69=1 loop_mode=loop_sustain volume=-6 ampeg_release=0.17 ampeg_attack=0.17
+    <region> seq_position=1 sample=39-brush_snare_loop.flac
+// Electric Snare (the wet sounding one)
+  <group> key=40 pitch_oncc40=$TUNINGRANGE pitch_curvecc40=1 seq_length=4 pan_oncc70=100 pan_curvecc70=1
+    <region> seq_position=1 sample=40-snare-electric_rr1.flac
+    <region> seq_position=2 sample=40-snare-electric_rr2.flac
+    <region> seq_position=3 sample=40-snare-electric_rr3.flac
+    <region> seq_position=4 sample=40-snare-electric_rr4.flac
+// Lo Floor Tom 
+  <group> key=41 pitch_oncc41=$TUNINGRANGE pitch_curvecc41=1 pan_oncc71=-100 pan_curvecc71=3
+    <region> sample=43-tom_floor.flac
+// Hi-Hat Closed
+  <group> key=42 pitch_oncc42=$TUNINGRANGE pitch_curvecc42=1 seq_length=2 pan_oncc72=100 pan_curvecc72=1
+  group=5 // comment out this line if you don't want to cut the open hi-hat with a closed hi-hat.
+    <region> amplitude_cc131=100 amplitude_curvecc131=6 seq_position=1 sample=42-hihat-closed_v1_rr1.flac
+    <region> amplitude_cc131=100 amplitude_curvecc131=6 seq_position=2 sample=42-hihat-closed_v1_rr2.flac
+    <region> amplitude_cc131=100 amplitude_curvecc131=5 seq_position=1 sample=42-hihat-closed_v2_rr1.flac
+    <region> amplitude_cc131=100 amplitude_curvecc131=5 seq_position=2 sample=42-hihat-closed_v2_rr2.flac
+// Hi Floor Tom
+  <group> key=43 pitch_oncc43=$TUNINGRANGE pitch_curvecc43=1 pan_oncc73=100 pan_curvecc73=1
+    <region> sample=43-tom_floor.flac
+// Hi-Hat Pedal
+  <group> key=44 pitch_oncc42=$TUNINGRANGE pitch_curvecc42=1 seq_length=2 pan_oncc72=100 pan_curvecc72=1
+  group=5 // comment out this line if you don't want to cut the open hi-hat with the pedal.
+    <region> amplitude_cc131=100 amplitude_curvecc131=6 seq_position=1 sample=44-hihat-pedal_v1_rr1.flac
+    <region> amplitude_cc131=100 amplitude_curvecc131=6 seq_position=2 sample=44-hihat-pedal_v1_rr2.flac
+    <region> amplitude_cc131=100 amplitude_curvecc131=5 seq_position=1 sample=44-hihat-pedal_v2_rr1.flac
+    <region> amplitude_cc131=100 amplitude_curvecc131=5 seq_position=2 sample=44-hihat-pedal_v2_rr2.flac
+// Low Tom
+  <group> key=45 pitch_oncc45=$TUNINGRANGE pitch_curvecc45=1 seq_length=4 pan_oncc75=100 pan_curvecc75=1
+    <region> seq_position=1 sample=45-tom_lo_rr1.flac
+    <region> seq_position=2 sample=45-tom_lo_rr2.flac
+    <region> seq_position=3 sample=45-tom_lo_rr3.flac
+    <region> seq_position=4 sample=45-tom_lo_rr4.flac
+// Hi-Hat Open
+  <group> key=46 transpose=5 pitch_oncc42=$TUNINGRANGE pitch_curvecc42=1 pan_oncc72=100 pan_curvecc72=1 off_by=5 group=0
+  // remove "off_by=5" above to disable the muting from both pedal and closed hi-hats.
+    // start with the shorter sample 
+	<region> lovel=1 hivel=69 sample=46-hihat-open_v1.flac
+    // gradually gets "sloppier" from velocity 70 to 80. Could implement as curves later but this works for now.
+    <region> lovel=70 hivel=71 sample=46-hihat-open_v1.flac volume=-1
+	<region> lovel=70 hivel=71 sample=46-hihat-open_v2.flac volume=-5
+    <region> lovel=72 hivel=73 sample=46-hihat-open_v1.flac volume=-2
+	<region> lovel=72 hivel=73 sample=46-hihat-open_v2.flac volume=-4
+    <region> lovel=74 hivel=75 sample=46-hihat-open_v1.flac volume=-3
+	<region> lovel=74 hivel=75 sample=46-hihat-open_v2.flac volume=-3
+    <region> lovel=76 hivel=77 sample=46-hihat-open_v1.flac volume=-4
+	<region> lovel=76 hivel=77 sample=46-hihat-open_v2.flac volume=-2
+    <region> lovel=78 hivel=79 sample=46-hihat-open_v1.flac volume=-5
+	<region> lovel=78 hivel=79 sample=46-hihat-open_v2.flac volume=-1
+	// all "sloppy" from 80 on up.
+    <region> lovel=80 hivel=127 sample=46-hihat-open_v2.flac
+// Lo-Mid Tom
+  <group> key=47 pitch_oncc47=$TUNINGRANGE pitch_curvecc47=1 seq_length=4 pan_oncc77=100 pan_curvecc77=1
+    <region> seq_position=1 sample=47-tom_mid_rr1.flac
+    <region> seq_position=2 sample=47-tom_mid_rr2.flac
+    <region> seq_position=3 sample=47-tom_mid_rr3.flac
+    <region> seq_position=4 sample=47-tom_mid_rr4.flac
+// Hi-Mid Tom
+  <group> key=48 pitch_oncc48=$TUNINGRANGE pitch_curvecc48=1 pan_oncc78=100 pan_curvecc78=1
+    <region> sample=48-tom_hi.flac
+// Crash Cymbal 1 (linked to High Woodblock pitch setting)
+  <group> key=49 transpose=1 pitch_oncc52=$TUNINGRANGE pitch_curvecc49=1 pan_oncc79=100 pan_curvecc79=1
+    <region> sample=49-crash_cymbal_1.flac
+// High Tom
+  <group> key=50 pitch_oncc50=$TUNINGRANGE pitch_curvecc50=1 pan_oncc80=100 pan_curvecc80=1
+    <region> sample=50-gock.flac
+// Clave [using Ride Cymbal assignment]
+  <group> key=51 pitch_oncc51=$TUNINGRANGE pitch_curvecc51=1 pan_oncc81=100 pan_curvecc81=1
+    <region> sample=51-Clave_snap.flac
+// High Woodblock [using Chinese Cymbal assignment]
+  <group> key=52 pitch_oncc52=$TUNINGRANGE pitch_curvecc52=1 pan_oncc82=100 pan_curvecc82=1
+    <region> sample=52-Woodblock_snap.flac
+// Low Woodblock [using Ride Cymbal Bell assignment]
+  <group> key=53 pitch_oncc53=$TUNINGRANGE pitch_curvecc53=1 pan_oncc83=100 pan_curvecc83=1
+    <region> sample=52-Woodblock_snap.flac
+// Guiro Short
+  <group> key=54 pitch_oncc54=$TUNINGRANGE seq_length=2 pitch_curvecc54=1 pan_oncc84=100 pan_curvecc84=1
+    <region> seq_position=1 sample=54-guiro-short_rr1.flac
+    <region> seq_position=2 sample=54-guiro-short_rr2.flac
+// Guiro Long
+  <group> key=55 pitch_oncc54=$TUNINGRANGE seq_length=2 pitch_curvecc54=1 pan_oncc84=100 pan_curvecc84=1
+    <region> seq_position=1 sample=55-guiro-long_rr1.flac
+    <region> seq_position=2 sample=55-guiro-long_rr2.flac
+// Cowbell -- tunes with Lo Woodblock, panning centers between woodblocks (sees both CCs)
+  <group> key=56 transpose=-3 pitch_oncc53=$TUNINGRANGE pitch_curvecc53=1 pan_oncc82=100 pan_curvecc82=1 pan_oncc83=100 pan_curvecc83=1
+    <region> sample=52-Woodblock_snap.flac
+// Crash Cymbal 2
+  <group> key=57 transpose=1 pitch_oncc52=$TUNINGRANGE pitch_curvecc57=1 pan_oncc87=100 pan_curvecc87=1 volume=-2
+    <region> sample=57-crash_cymbal_2.flac

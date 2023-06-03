@@ -1,0 +1,82 @@
+// The Snap 1.22.07 by Malaclypse the Younger, mal2fnord@gmail.com
+// 
+// This is just an opportunistic "toy" that uses existing samples to provide some pitched percussion effects.
+//
+// There is no separate documentation, so read the comments :) .
+//
+// The MIT license applies only to distribution of the Software itself, and
+// individual components that comprise it. There is ABSOLUTELY NO REQUIREMENT
+// to provide credit when merely using the instrument to make sound. You are
+// only required to provide the boilerplate license if distributing the
+// instrument itself or pieces of.
+//
+// --------------------------Begin boilerplate license--------------------------
+// MIT License 
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy 
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions: 
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software. Additionally, all 
+// alterations which are distributed are to be attributed to the person or
+// organization making them.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// ---------------------------End boilerplate license---------------------------
+
+// Curve 0 is linear, from 0 to 1. v000=0 v127=1
+// Curve 1 is bipolar, from -1 to 1.  v000=-1 v127=1
+// Curve 2 is inverted linear, from 1 to 0. v000=1 v127=0
+// Curve 3 bipolar inverted, from 1 to -1. v000=1 v127=-1
+// Curve 4 concave (square the Curve 0 value).
+// Curve 5 is Xfin power curve (square root of Curve 0 value).
+// Curve 6 is Xfout power curve (square root of Curve 2 value).
+
+<control>
+#define $DYN_RANGE 98 // Keeps dynamic range to about 36 dB (ff attack vs. pp attack)
+
+// CC7 and CC10 are forced on us by Sforzando. Might as well make them look good and pad out the rest of the row. CC7 is still master volume. CC10 has been recycled.
+set_cc7=84 label_cc7=7:👏 Volume 👏
+set_cc8=63 label_cc8=8:Bass ±dB
+set_cc9=63 label_cc9=9:Mid ±dB
+set_cc10=63 label_cc10=10:Treble ±dB
+set_cc12=127 label_cc12=12:Lowpass Frq
+set_cc13=0 label_cc13=13:Attack
+set_cc14=63 label_cc14=14:Release
+set_cc64=0 label_cc64=64:Sustain
+
+default_path=samples/ // I use a flat file structure. How convenient.
+
+//Tone Stack section
+#define $EQ1 200 // $EQ1LO = frequency for the center of EQ1
+#define $EQ2 800 // $EQ2LO = frequency for the center of EQ2
+#define $EQ3 3200 // $EQ3LO = frequency for the center of EQ3
+#define $EQBOOST 24 // How far (total dB both ways) can the EQ bands cut or boost?
+#define $EQBW 2 // Bandwidth of EQ bands (in octaves)
+
+<global>
+sw_default=1 sw_lokey=0 sw_hikey=2
+volume=0 amp_veltrack=98 pan_oncc10=0
+//Tone Stack section -- can also provide distortion effects when boosted enough.
+eq1_freq=$EQ1 eq1_bw=$EQBW eq1_gain=-0.5*$EQBOOST eq1_gaincc8=$EQBOOST // Bass
+eq2_freq=$EQ2 eq2_bw=$EQBW eq2_gain=-0.5*$EQBOOST eq2_gaincc9=$EQBOOST // Mid
+eq3_freq=$EQ3 eq3_bw=$EQBW eq3_gain=-0.5*$EQBOOST eq3_gaincc10=$EQBOOST // Treble
+//LPF "Tone Knob" separate from Tone Stack
+fil_type=lpf_1p cutoff=20 cutoff_cc12=48000 cutoff_curvecc12=4 // Lowpass
+ampeg_attack_curvecc13=4 ampeg_attackcc13=1 // Attack setting
+ampeg_release_curvecc14=4 ampeg_releasecc14=2 // Release setting
+
+<master>
+  <region> sw_last=0 sw_label=Dark Resonant Snaps key=83 lokey=5 hikey=127 tune=50 sample=51-Clave_snap.flac
+  <region> sw_last=1 sw_label=Dark Muted Snaps key=80 lokey=5 hikey=127 tune=-20 sample=37-Side_stick_snap_vl1.flac
+  <region> sw_last=2 sw_label=Bright Snaps key=80 lokey=5 hikey=127 tune=0 sample=52-Woodblock_snap.flac
